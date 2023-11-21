@@ -5,6 +5,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 RUN apt-get install -y tesseract-ocr
+RUN apt install tesseract-ocr-fas
 
 WORKDIR /code
 
