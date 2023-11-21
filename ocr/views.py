@@ -21,5 +21,5 @@ class ConfirmPhoto(APIView):
             data=request.data, context={"request": request}
         )
         if serializer.is_valid(raise_exception=True):
-            response = serializer.save()
+            response = {"text": serializer.save()}
             return Response(response, status=status.HTTP_200_OK)
