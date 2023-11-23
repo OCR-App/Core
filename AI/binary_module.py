@@ -1,6 +1,5 @@
 import cv2
 
-
 def black_and_white(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     image_blurred = cv2.GaussianBlur(gray, (5, 5), 0)
