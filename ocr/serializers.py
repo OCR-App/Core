@@ -5,6 +5,7 @@ from AI.binary_module import black_and_white
 from AI.Tesseract_Library import ocr_tesseract
 from .models import ImageData, ImageLanguages
 from .utils import str_generator
+from googletrans import Translator
 import uuid
 import cv2
 import os
@@ -71,3 +72,15 @@ class ConfirmPhotoSerializer(serializers.Serializer):
         binary_img = self.binary_image_process(obj.original_image.path)
         text = self.ocr_tesseract_process(binary_img, obj.lang)
         return text
+
+
+class TranslateTextSerializer(serializers.Serializer):
+    text = serializers.CharField()
+
+    def translate_to_persian(self, text: str):
+        translator = Translator()
+        translation = translator.translate(text, dest='fa')
+        return translation.text
+
+    def save(self, **kwargs):
+        return self.translate_to_persian(self.validated_data["text"])
