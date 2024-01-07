@@ -54,10 +54,17 @@ class GetPhotoSerializer(serializers.Serializer):
 
 class ConfirmPhotoSerializer(serializers.Serializer):
     uuid = serializers.CharField(max_length=15)
+    model = serializers.CharField(max_length=15)
 
     def validate_uuid(self, value):
         if not ImageData.objects.filter(uuid=value).exists():
             raise serializers.ValidationError("There is not exists.")
+        return value
+
+    def validate_model(self, value):
+        if value not in ("custom", "tesseract"):
+            raise serializers.ValidationError(
+                "You can choose custom or tesseract.")
         return value
 
     def binary_image_process(self, image_path):
@@ -67,10 +74,16 @@ class ConfirmPhotoSerializer(serializers.Serializer):
     def ocr_tesseract_process(self, image, lang):
         return ocr_tesseract(image, lang)
 
+    def custom_model_process(self, image):
+        pass
+
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
         binary_img = self.binary_image_process(obj.original_image.path)
-        text = self.ocr_tesseract_process(binary_img, obj.lang)
+        if self.validated_data["model"] == "custom":
+            pass
+        else:
+            text = self.ocr_tesseract_process(binary_img, obj.lang)
         return text
 
 
