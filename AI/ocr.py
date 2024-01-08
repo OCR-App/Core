@@ -1,7 +1,8 @@
 import numpy as np
 import cv2
-from segment import line_horizontal_projection, word_vertical_projection, segment
+from .segment import line_horizontal_projection, word_vertical_projection, segment
 from tensorflow.keras.models import load_model
+import os
 
 persian_letters = ['ﺛ', 'ﻣ', 'ﺑ', 'ل', 'ﮐ', 'ﺷ', 'ح', 'ژ', 'د', '2', 'و', 'ت', 'ک', '9', 'ن', 'م', 'ف', 'ط', '6', 'ﻻ',
                    'ﭘ', 'ﻧ', 'ﻏ', '،', 'ض', 'ﻳ', 'ج', 'ﻫ', 'پ', 'ﻟ', 'ﻋ', 'ز', 'ب', 'ﺻ', 'ق', '1', '3', 'ث', '0', 'ﻓ',
@@ -9,7 +10,7 @@ persian_letters = ['ﺛ', 'ﻣ', 'ﺑ', 'ل', 'ﮐ', 'ﺷ', 'ح', 'ژ', 'د', '2
                    'ﮔ', 'ﻬ', 'ص', '.', 'ﯾ', 'خ', 'ﺟ', 'گ', 'ش', 'س', ':', 'ﻐ', 'ر', 'ع', 'ﻗ']
 
 
-cnn = load_model('ocr.h5')
+cnn = load_model(f'{os.getcwd()}/ocr.h5')
 
 
 def OCR(img):
