@@ -10,6 +10,7 @@ from googletrans import Translator
 import uuid
 import cv2
 import os
+from spellchecker import SpellChecker
 
 
 class ImageDataSerializer(serializers.ModelSerializer):
@@ -75,18 +76,43 @@ class ConfirmPhotoSerializer(serializers.Serializer):
     def ocr_tesseract_process(self, image, lang):
         return ocr_tesseract(image, lang)
 
-    def custom_model_process(self, image):
-        return OCR(image)
+    def post_process(self, word: str, saved_words: str):
+        spell = SpellChecker()
+        spell.word_frequency.load_words(saved_words)
+        misspelled = spell.unknown([word])
+        data = None
+        for item in misspelled:
+            data = spell.candidates(item)
+        if data:
+            if word in list(data):
+                return word
+            return list(
+                filter(lambda x: len(x) == len(word), list(data)))[0]
+        else:
+            return word
+
+    def post_process_main(self, text: str):
+        with open("cleaned_words.txt", 'r') as file:
+            saved_words = file.read().splitlines()
+        words = "".join(text).split(" ")
+        for i, item in enumerate(words):
+            new_word = self.post_process(item, saved_words)
+            words[i] = new_word
+        return words
+
+    def custom_model_process(self, path):
+        image = cv2.imread(path)
+        text = OCR(image)
+        words = self.post_process_main(text)
+        return " ".join(words)
 
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
         if self.validated_data["model"] == "custom":
-            image = cv2.imread(obj.original_image.path)
-            text = self.custom_model_process(image)
+            text = self.custom_model_process(obj.original_image.path)
         else:
             binary_img = self.binary_image_process(obj.original_image.path)
             text = self.ocr_tesseract_process(binary_img, obj.lang)
-        text = "".join(text)
         return text
 
 
