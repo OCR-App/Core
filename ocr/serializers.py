@@ -3,6 +3,7 @@ from django.core.files.base import File
 from AI.Segmentation_Module import segment
 from AI.binary_module import black_and_white
 from AI.Tesseract_Library import ocr_tesseract
+from AI.ocr import OCR
 from .models import ImageData, ImageLanguages
 from .utils import str_generator
 from googletrans import Translator
@@ -75,13 +76,13 @@ class ConfirmPhotoSerializer(serializers.Serializer):
         return ocr_tesseract(image, lang)
 
     def custom_model_process(self, image):
-        pass
+        return OCR(image)
 
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
         binary_img = self.binary_image_process(obj.original_image.path)
         if self.validated_data["model"] == "custom":
-            pass
+            text = self.custom_model_process(binary_img)
         else:
             text = self.ocr_tesseract_process(binary_img, obj.lang)
         return text
