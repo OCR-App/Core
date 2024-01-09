@@ -80,11 +80,13 @@ class ConfirmPhotoSerializer(serializers.Serializer):
 
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
-        binary_img = self.binary_image_process(obj.original_image.path)
         if self.validated_data["model"] == "custom":
-            text = self.custom_model_process(binary_img)
+            image = cv2.imread(obj.original_image.path)
+            text = self.custom_model_process(image)
         else:
+            binary_img = self.binary_image_process(obj.original_image.path)
             text = self.ocr_tesseract_process(binary_img, obj.lang)
+        text = "".join(text)
         return text
 
 
