@@ -83,11 +83,16 @@ class ConfirmPhotoSerializer(serializers.Serializer):
         data = None
         for item in misspelled:
             data = spell.candidates(item)
-        if data:
+        if data is not None:
             if word in list(data):
                 return word
-            return list(
-                filter(lambda x: len(x) == len(word), list(data)))[0]
+            else:
+                temp = list(
+                    filter(lambda x: len(x) == len(word), list(data)))
+                if len(temp) == 0:
+                    return word
+                else:
+                    return self.string_similarity(word, list(data))
         else:
             return word
 
@@ -100,11 +105,29 @@ class ConfirmPhotoSerializer(serializers.Serializer):
             words[i] = new_word
         return words
 
+    def string_similarity(self, str1, data: list):
+        result = list()
+        len_str1 = len(str1)
+        for item in data:
+            len_str2 = len(item)
+            min_len = min(len_str1, len_str2)
+            match_count = sum(c1 == c2 for c1, c2 in zip(str1, item))
+            similarity_percentage = (match_count / min_len) * 100
+            result.append((similarity_percentage, item))
+        max_ = result[0][0]
+        index = 0
+        for i, item in enumerate(result):
+            if item[0] > max_:
+                max_ = item[0]
+                index = i
+        return result[index][1]
+
     def custom_model_process(self, path):
         image = cv2.imread(path)
         text = OCR(image)
         words = self.post_process_main(text)
         return " ".join(words)
+        # return "".join(text)
 
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
