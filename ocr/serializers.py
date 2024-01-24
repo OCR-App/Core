@@ -127,7 +127,6 @@ class ConfirmPhotoSerializer(serializers.Serializer):
         text = OCR(image)
         words = self.post_process_main(text)
         return " ".join(words)
-        # return "".join(text)
 
     def save(self, **kwargs):
         obj = ImageData.objects.get(uuid=self.validated_data["uuid"])
