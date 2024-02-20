@@ -13,7 +13,7 @@ COPY requirements.txt /code/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY ocr_tuesday_3.h5 /code/
+COPY LeNet5.h5 /code/
 COPY cleaned_words.txt /code/
 COPY . /code/
 
